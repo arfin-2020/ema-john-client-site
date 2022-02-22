@@ -1,9 +1,20 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
 
 const Login = () =>{
+        const {signInWithGoogle} = useAuth();
+
+    const handleWithGoogle = () =>{
+        try{
+             signInWithGoogle()
+        }catch(error){
+            console.log(error)
+        }
+    }
     return (
         <div className="App">
             <h2>Please Login Here</h2>
+            
             <form>
                 <input 
                 type = 'email'
@@ -17,7 +28,7 @@ const Login = () =>{
                 /><br/><br/>
             </form>
             <p>New to ema-jhon? <Link to='/register'>Register</Link></p>
-            <button className="btn-regular">Sign In with Google</button>
+            <button className="btn-regular" onClick={handleWithGoogle}>Sign In with Google</button>
         </div>
     )
 }
