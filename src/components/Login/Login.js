@@ -1,12 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 import { useAuth } from "../Context/AuthContext";
 
 const Login = () =>{
         const {signInWithGoogle} = useAuth();
-
-    const handleWithGoogle = () =>{
+        // console.log(currentUser?.name)
+        const location = useLocation();
+        const history = useHistory();
+        const redirect_uri = location.state?.from || '/';
+        // console.log('came from', location?.state.from)
+    const handleWithGoogle = async() =>{
         try{
-             signInWithGoogle()
+            await signInWithGoogle()
+            history.push(redirect_uri)
         }catch(error){
             console.log(error)
         }
