@@ -1,7 +1,11 @@
-import React from "react";
+import emailjs from '@emailjs/browser';
+import React, { useRef } from 'react';
 import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import { clearTheCart, getStoredCart } from "../../utilities/fakedb";
 import { useAuth } from "../Context/AuthContext";
 import classes from "./Shippiung.module.css";
+
 const Shipping = () => {
   const {
     register,
@@ -9,10 +13,50 @@ const Shipping = () => {
     formState: { errors },
   } = useForm();
   const {currentUser} = useAuth();
+  const form = useRef();
+ 
 //   console.log(currentUser.name)
-  const onSubmit = data => console.log(data);
+  const onSubmit = (data,e) => {
+    const savedCart = getStoredCart();
+    data.order = savedCart;
+   
+      fetch('http://localhost:5000/orders',{
+        method: 'POST',
+        headers: {
+          'content-type' : 'application/json'
+          // 'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        if(data.insertedId){
+          Swal.fire({
+              position: 'center',
+              icon: 'success',
+              title: 'Your Order placed successfull.',
+              showConfirmButton: false,
+              timer: 1500
+            });
+            
+            clearTheCart()
+            e.target.reset()
+            emailjs.sendForm('service_gmnfsef', 'template_2lx7e69', form.current, 'user_zU3VcJU814AmbyZosk6iH')
+            .then((result) => {
+                console.log(result.text);
+            }, (error) => {
+                console.log(error.text);
+            });
+           
+      }
+      })
+ 
+  
+  };
+  
+ 
   return (
-    <form className={classes.shippingform} onSubmit={handleSubmit(onSubmit)}>
+    <form ref={form} className={classes.shippingform} onSubmit={handleSubmit(onSubmit)}>
       <input
         className={`${classes.shippingForm} ${classes.input}`}
         placeholder="name"

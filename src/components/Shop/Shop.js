@@ -1,3 +1,4 @@
+import { makeStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useCart from '../../hooks/useCart';
@@ -6,20 +7,36 @@ import Cart from '../Cart/Cart';
 import Product from '../Product/Product';
 import './Shop.css';
 
+const useStyles = makeStyles((theme) => ({
+    root: {
+      '& > *': {
+        marginTop: theme.spacing(2),
+      },
+    },
+  }));
 const Shop = () => {
     const [products, setProducts] = useState([]);
-    const [cart, setCart] = useCart(products);
+    const [cart, setCart] = useCart();
+    const [page, setPage] = useState(0);
+    // console.log(page)
+    const classes = useStyles();
+    const [pageCount, setPageCount] = useState(0);
+    // console.log(pageCount)
     // products to be rendered on the UI
     const [displayProducts, setDisplayProducts] = useState([]);
-
+    const size = 10;
     useEffect(() => {
-        fetch('./products.json')
+        fetch(`http://localhost:5000/products?page=${page}&&size=${size}`)
             .then(res => res.json())
             .then(data => {
-                setProducts(data);
-                setDisplayProducts(data);
+                setProducts(data.products);
+                setDisplayProducts(data.products);
+                const count = data.count;
+                const pageNumber = Math.ceil(count/size);
+                
+                setPageCount(pageNumber);
             });
-    }, []);
+    }, [page]);
 
 
 
@@ -67,6 +84,35 @@ const Shop = () => {
                         >
                         </Product>)
                     }
+                    <div className='pagination'>
+                        {
+                            
+                            [...Array(pageCount).keys()]
+                            .map(number =><button 
+                            className={number === page ? "selected" : ""}
+                            key={number}
+                            onClick={()=>setPage(number)}
+                            >{number}</button>)
+                        }
+                    </div>
+                    {/* <div className={classes.root}>
+                   
+                    {
+                            
+                            [...Array(pageCount).keys()]
+                            .map(number =>
+                                <Pagination  
+                                key={number}
+                                className={number === page ? "selected" : ""}
+                                onClick={()=>setPage(number)} 
+                                count={pageCount} 
+                                color="primary" 
+
+                                />
+                            )
+                        }
+                        
+                    </div> */}
                 </div>
                 <div className="cart-container">
                     <Cart cart={cart}>
