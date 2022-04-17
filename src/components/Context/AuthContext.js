@@ -1,4 +1,4 @@
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, getIdToken, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import "../Firebase/Firebase.config";
@@ -15,22 +15,32 @@ const AuthProvider = ({children}) =>{
     const history =  useHistory();
     
     useEffect(()=>{
-        const auth = getAuth();
+       
             const unsubscribe =onAuthStateChanged(auth, user=>{
                 // console.log(user)
-                setCurrentUser(user)
+                if(user){
+                    getIdToken(user)
+                    .then(idToken=>localStorage.setItem('idToken',idToken));
+                    setCurrentUser(user);
+                }
+                else{
+
+                    setCurrentUser({})
+                }
+                
             });
             return unsubscribe;
-    },[])
+    },[auth])
 
     const signInWithGoogle =async() =>{
       return await signInWithPopup(auth,Googleprovider)
         .then((result)=>{
             // console.log(result.user);
-            const {displayName, photoURL} = result.user;
+            const {displayName, photoURL, email} = result.user;
             const loggedinUser = {
                 name: displayName,
-                photo: photoURL
+                photo: photoURL,
+                email: email
             }
             setCurrentUser(loggedinUser);
             
